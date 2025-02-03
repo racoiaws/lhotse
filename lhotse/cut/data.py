@@ -1053,6 +1053,12 @@ class DataCut(Cut, CustomFieldMixin, metaclass=ABCMeta):
     ) -> "DataCut":
         ...
 
+    def lowpass(self, frequency: float) -> "DataCut":
+        return fastcopy(
+            self,
+            recording=self.recording.lowpass(frequency),
+        )
+
     def map_supervisions(
         self, transform_fn: Callable[[SupervisionSegment], SupervisionSegment]
     ) -> "DataCut":

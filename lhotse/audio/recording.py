@@ -20,6 +20,7 @@ from lhotse.augmentation import (
     AudioTransform,
     DereverbWPE,
     LoudnessNormalization,
+    Lowpass,
     Narrowband,
     Resample,
     ReverbWithImpulseResponse,
@@ -920,6 +921,14 @@ class Recording:
             sampling_rate=sampling_rate,
             transforms=transforms,
         )
+
+    def lowpass(self, frequency: float):
+        assert frequency <= 2 * self.sampling_rate
+
+        transforms = self.transforms.copy() if self.transforms is not None else []
+        transforms.append(Lowpass(frequency))
+
+        return fastcopy(self, transforms=transforms)
 
     @staticmethod
     def from_dict(data: dict) -> "Recording":
