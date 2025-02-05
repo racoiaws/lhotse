@@ -686,6 +686,14 @@ class MixedCut(Cut):
         )
 
     def lowpass(self, frequency: float) -> "MixedCut":
+        """
+        Return a copy of this Cut that has its sub-Cut lowpassed.
+
+        :param frequency: Corner frequency for the lowpass filter.
+
+        :return: A modified :class:`~lhotse.MixedCut` containing lowpassed audio in its sub-Cuts
+        """
+        assert self.has_recording, "Cannot lowpass a MixedCut without a Recording."
         return MixedCut(
             tracks=[
                 fastcopy(

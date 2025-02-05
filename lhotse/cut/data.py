@@ -1054,6 +1054,14 @@ class DataCut(Cut, CustomFieldMixin, metaclass=ABCMeta):
         ...
 
     def lowpass(self, frequency: float) -> "DataCut":
+        """
+        Return a copy of this Cut that has its Recordings lowpassed.
+
+        :param frequency: Corner frequency for the lowpass filter.
+
+        :return: A modified :class:`~lhotse.DataCut` containing lowpassed audio
+        """
+        assert self.has_recording, "Cannot lowpass a DataCut without a Recording."
         return fastcopy(
             self,
             recording=self.recording.lowpass(frequency),
