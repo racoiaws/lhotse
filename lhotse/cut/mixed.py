@@ -726,6 +726,7 @@ class MixedCut(Cut):
         """
         assert self.has_recording, "Cannot lowpass a MixedCut without a Recording."
         return MixedCut(
+            id=self.id,
             tracks=[
                 fastcopy(
                     t,
