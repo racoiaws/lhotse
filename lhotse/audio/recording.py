@@ -923,7 +923,17 @@ class Recording:
         )
 
     def lowpass(self, frequency: float):
-        assert frequency <= 2 * self.sampling_rate
+        """
+        Return a new ``Recording`` that will lazily apply a lowpass filter while loading audio.
+
+        :param frequency: The cutoff frequency in Hz (must be less than Nyquist frequency).
+        :return: a modified copy of the current ``Recording``.
+        """
+        nyquist = self.sampling_rate / 2
+        if frequency >= nyquist:
+            raise ValueError(
+                f"Cutoff frequency ({frequency}Hz) must be less than Nyquist frequency ({nyquist}Hz)"
+            )
 
         transforms = self.transforms.copy() if self.transforms is not None else []
         transforms.append(Lowpass(frequency))
