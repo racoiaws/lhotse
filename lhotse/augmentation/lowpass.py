@@ -23,11 +23,19 @@ class Lowpass(AudioTransform):
         samples: np.ndarray,
         sampling_rate: int,
     ):
-        N, _ = scipy.signal.kaiserord(ripple=100, width=0.05)
+        if not is_module_available("scipy"):
+            raise ImportError(
+                "In order to use Lowpass transforms, run 'pip install scipy'"
+            )
+
+        import scipy.signal
+
+        width = 0.02
+        N, _ = scipy.signal.kaiserord(ripple=200, width=width)
         taps = scipy.signal.firwin(
             numtaps=N,
             cutoff=self.frequency,
-            width=0.05,
+            width=width,
             fs=sampling_rate,
             pass_zero="lowpass",
         )
