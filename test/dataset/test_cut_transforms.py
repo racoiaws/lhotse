@@ -4,11 +4,13 @@ from math import isclose
 import numpy as np
 import pytest
 
+import lhotse.augmentation
 from lhotse import CutSet
 from lhotse.cut import MixedCut
 from lhotse.dataset import (
     CutMix,
     ExtraPadding,
+    Lowpass,
     PerturbSpeed,
     PerturbTempo,
     PerturbVolume,
@@ -215,3 +217,31 @@ def test_extra_padding_seconds(randomized):
     if randomized:
         durations = [c.duration for c in padded_cuts]
         assert len(set(durations)) > 1
+
+
+@pytest.mark.parametrize("preserve_id", [False, True])
+def test_lowpass(preserve_id: bool):
+    tfnm = Lowpass(
+        frequencies=[2000, 4000],
+        filter_types=["butter", "cheby1"],
+        p=0.5,
+        randgen=random.Random(0),
+        preserve_id=preserve_id,
+    )
+    cuts = DummyManifest(CutSet, begin_id=0, end_id=10)
+    cuts_lp = tfnm(cuts)
+
+    # Check that durations remain unchanged
+    assert all(cut.duration == cut_lp.duration for cut, cut_lp in zip(cuts, cuts_lp))
+
+    assert all(
+        isinstance(cut.recording.transforms[-1], lhotse.augmentation.Lowpass)
+        for cut in cuts_lp
+        if cut.recording.transforms
+    )
+
+    if preserve_id:
+        assert all(cut.id == cut_lp.id for cut, cut_lp in zip(cuts, cuts_lp))
+    else:
+        # Note: not using all() because Lowpass has p=0.5
+        assert any(cut.id != cut_lp.id for cut, cut_lp in zip(cuts, cuts_lp))
