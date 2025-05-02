@@ -1,6 +1,6 @@
 from .concatenate import CutConcatenate, concat_cuts
 from .extra_padding import ExtraPadding
-from .lowpass import Lowpass
+from .lowpass import Lowpass, LowpassUsingResampling
 from .mix import CutMix
 from .perturb_speed import PerturbSpeed
 from .perturb_tempo import PerturbTempo
@@ -12,6 +12,7 @@ __all__ = [
     "CutMix",
     "ExtraPadding",
     "Lowpass",
+    "LowpassUsingResampling",
     "PerturbSpeed",
     "PerturbTempo",
     "PerturbVolume",
