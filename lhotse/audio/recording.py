@@ -892,7 +892,7 @@ class Recording:
             transforms=transforms,
         )
 
-    def resample(self, sampling_rate: int, backend: str = "default") -> "Recording":
+    def resample(self, sampling_rate: int) -> "Recording":
         """
         Return a new ``Recording`` that will be lazily resampled while loading audio.
         :param sampling_rate: The new sampling rate.
@@ -906,7 +906,6 @@ class Recording:
             Resample(
                 source_sampling_rate=self.sampling_rate,
                 target_sampling_rate=sampling_rate,
-                backend=backend,
             )
         )
 

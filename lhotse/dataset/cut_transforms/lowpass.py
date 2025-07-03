@@ -201,6 +201,9 @@ class LowpassUsingResampling:
             self.rng = random.Random(resolve_seed(self.seed))
 
     def __call__(self, cuts: CutSet) -> CutSet:
+        original_backend = lhotse.augmentation.torchaudio.get_resample_backend()
+        lhotse.augmentation.torchaudio.set_resample_backend(self.backend)
+
         lowpassed_cuts = []
         for cut in cuts:
             if self.rng.random() <= self.p:
@@ -216,13 +219,13 @@ class LowpassUsingResampling:
                 )
                 cutoff_frequency = int(cutoff_frequency)
 
-                new_cut = cut.resample(
-                    cutoff_frequency * 2, backend=self.backend
-                ).resample(cut.sampling_rate, backend=self.backend)
+                new_cut = cut.resample(cutoff_frequency * 2).resample(cut.sampling_rate)
                 if not self.preserve_id:
                     new_cut.id = f"{cut.id}_lowpassed{cutoff_frequency:.0f}"
                 lowpassed_cuts.append(new_cut)
             else:
                 lowpassed_cuts.append(cut)
+
+        lhotse.augmentation.torchaudio.set_resample_backend(original_backend)
 
         return CutSet(lowpassed_cuts)
