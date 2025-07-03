@@ -192,6 +192,7 @@ class LowpassUsingResampling:
     seed: Union[int, Literal["trng", "randomized"]] = 42
     rng: Optional[random.Random] = None
     preserve_id: bool = False
+    backend: Literal["default", "sox"] = "default"
 
     def __post_init__(self) -> None:
         if self.rng is not None and self.seed is not None:
@@ -210,12 +211,16 @@ class LowpassUsingResampling:
                     )
 
                 # sampling from log-uniform[low, high] distribution
-                frequency = math.exp(self.rng.uniform(math.log(low), math.log(high)))
-                frequency = int(frequency)
+                cutoff_frequency = math.exp(
+                    self.rng.uniform(math.log(low), math.log(high))
+                )
+                cutoff_frequency = int(cutoff_frequency)
 
-                new_cut = cut.resample(frequency).resample(cut.sampling_rate)
+                new_cut = cut.resample(
+                    cutoff_frequency * 2, backend=self.backend
+                ).resample(cut.sampling_rate, backend=self.backend)
                 if not self.preserve_id:
-                    new_cut.id = f"{cut.id}_lowpassed{frequency:.0f}"
+                    new_cut.id = f"{cut.id}_lowpassed{cutoff_frequency:.0f}"
                 lowpassed_cuts.append(new_cut)
             else:
                 lowpassed_cuts.append(cut)
