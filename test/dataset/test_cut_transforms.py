@@ -306,11 +306,13 @@ def test_compress(preserve_id: bool):
         cut.load_audio()
 
 
-def test_compress_gsm():
+@pytest.mark.parametrize("resample_backend", ["default", "sox"])
+def test_compress_gsm(resample_backend: Literal["default", "sox"]):
     tfnm = Compress(
         codecs=["gsm"],
         p=1.0,
         seed=0,
+        resample_backend=resample_backend,
     )
     cuts = DummyManifest(CutSet, begin_id=0, end_id=10, with_data=True)
     cuts_comp = tfnm(cuts)

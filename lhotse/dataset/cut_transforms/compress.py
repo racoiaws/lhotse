@@ -4,6 +4,7 @@ from typing import List, Literal, Optional, Tuple, Union
 
 from lhotse import CutSet
 from lhotse.augmentation.compress import Codec
+from lhotse.augmentation.torchaudio import get_resample_backend, set_resample_backend
 from lhotse.dataset.dataloading import resolve_seed
 
 
@@ -24,6 +25,7 @@ class Compress:
     :param p: The probability of applying the low-pass filter (default: 0.5).
     :param randgen: An optional random number generator (default: a new instance).
     :param preserve_id: Whether to preserve the original cut ID (default: False).
+    :param resample_backend: The backend to use for resampling the audio in case of necessity. One of "default" or "sox".
     """
 
     codecs: List[Codec]
@@ -34,6 +36,7 @@ class Compress:
     seed: Union[int, Literal["trng", "randomized"]] = 42
     rng: Optional[random.Random] = None
     preserve_id: bool = False
+    resample_backend: Literal["default", "sox"] = "default"
 
     def __post_init__(self) -> None:
         assert sorted(self.codecs) == sorted(list(set(self.codecs))), "duplicate codecs"
@@ -66,6 +69,9 @@ class Compress:
             self.rng = random.Random(resolve_seed(self.seed))
 
     def __call__(self, cuts: CutSet) -> CutSet:
+        original_backend = get_resample_backend()
+        set_resample_backend(self.resample_backend)
+
         compressed_cuts = []
         for cut in cuts:
             if self.rng.random() <= self.p:
@@ -89,5 +95,7 @@ class Compress:
                 compressed_cuts.append(new_cut)
             else:
                 compressed_cuts.append(cut)
+
+        set_resample_backend(original_backend)
 
         return CutSet(compressed_cuts)
