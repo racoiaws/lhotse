@@ -1528,7 +1528,12 @@ class CutSet(Serializable, AlgorithmMixin):
             return cuts[0]
         return CutSet(cuts)
 
-    def resample(self, sampling_rate: int, affix_id: bool = False) -> "CutSet":
+    def resample(
+        self,
+        sampling_rate: int,
+        affix_id: bool = False,
+        resample_custom_fields: bool = True,
+    ) -> "CutSet":
         """
         Return a new :class:`~lhotse.cut.CutSet` that contains cuts resampled to the new
         ``sampling_rate``. All cuts in the manifest must contain recording information.
@@ -1540,7 +1545,12 @@ class CutSet(Serializable, AlgorithmMixin):
         :return: a modified copy of the ``CutSet``.
         """
         return self.map(
-            partial(_resample, sampling_rate=sampling_rate, affix_id=affix_id)
+            partial(
+                _resample,
+                sampling_rate=sampling_rate,
+                affix_id=affix_id,
+                resample_custom_fields=resample_custom_fields,
+            )
         )
 
     def perturb_speed(self, factor: float, affix_id: bool = True) -> "CutSet":
