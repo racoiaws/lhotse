@@ -57,9 +57,12 @@ def test_saturation_soft_tanh(mono_sine_wave, gain_db):
     assert not np.allclose(saturated_signal, mono_sine_wave, rtol=1e-2)
 
 
-def test_saturation_silence():
+@pytest.mark.parametrize("hard", [True, False])
+@pytest.mark.parametrize("gain_db", [0.0, 3.0, 6.0, 12.0])
+@pytest.mark.parametrize("normalize", [True, False])
+def test_saturation_silence(hard, gain_db, normalize):
     silence = np.zeros(16000, dtype=np.float32)
-    saturation = Saturation(hard=False, gain_db=0.0, normalize=True)
+    saturation = Saturation(hard=hard, gain_db=gain_db, normalize=normalize)
 
     saturated_signal = saturation(silence, 16000)
 
@@ -102,8 +105,11 @@ def test_saturation_reverse_timestamps():
     assert reversed_duration == duration
 
 
-def test_saturation_serialization():
-    saturation = Saturation(hard=True, gain_db=3.0, normalize=False)
+@pytest.mark.parametrize("hard", [True, False])
+@pytest.mark.parametrize("gain_db", [0.0, 3.0, 6.0, 12.0])
+@pytest.mark.parametrize("normalize", [True, False])
+def test_saturation_serialization(hard, gain_db, normalize):
+    saturation = Saturation(hard=hard, gain_db=gain_db, normalize=normalize)
 
     # Serialize to dict
     saturation_dict = saturation.to_dict()
