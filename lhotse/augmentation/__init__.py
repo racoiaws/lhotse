@@ -1,9 +1,9 @@
-from .saturation import Saturation
 from .common import AugmentFn
 from .compress import Compress
 from .loudness import LoudnessNormalization
 from .lowpass import Lowpass
 from .rir import ReverbWithImpulseResponse
+from .saturation import Saturation
 from .torchaudio import *
 from .transform import AudioTransform
 from .utils import FastRandomRIRGenerator, convolve1d
