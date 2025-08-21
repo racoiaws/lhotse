@@ -1,3 +1,4 @@
+from .saturation import Saturation
 from .common import AugmentFn
 from .compress import Compress
 from .loudness import LoudnessNormalization

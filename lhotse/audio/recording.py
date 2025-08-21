@@ -25,6 +25,7 @@ from lhotse.augmentation import (
     Narrowband,
     Resample,
     ReverbWithImpulseResponse,
+    Saturation,
     Speed,
     Tempo,
     Volume,
@@ -994,6 +995,38 @@ class Recording:
         )
 
         return fastcopy(self, transforms=transforms)
+
+    def perturb_saturation(self, hard: bool = False, gain_db: float = 0.0, normalize: bool = True, oversampling: Optional[int] = 4, affix_id: bool = False) -> "Recording":
+        """
+        Return a new ``Recording`` that will lazily apply a saturation effect while loading audio.
+        Saturates input signal in [-1, 1] range.
+
+        `gain_db` is the amount of gain in decibels to apply before saturation (and to revert back to original level after).
+        `hard` whether to apply hard clipping instead of soft saturation.
+        `normalize` whether to normalize the input signal to 0 dBFS before applying saturation and gain. True by default.
+        `oversampling` if provided, we will oversample the input signal by the given integer factor before applying saturation and then downsample back to the original sampling rate.
+
+        :param hard: If True, apply hard clipping (sharp cutoff); otherwise, apply soft saturation.
+        :param gain_db: The amount of gain in decibels to apply before saturation.
+        :param normalize: If True, normalize the input signal to 0 dBFS before applying saturation.
+        :param oversampling: If provided, we will oversample the input signal by the given integer factor before applying saturation and then downsample back to the original sampling rate.
+        :param affix_id: When true, we will modify the ``Recording.id`` field
+            by affixing it with "_sat{gain_db}".
+        :return: a modified copy of the current ``Recording`` with the saturation transform applied.
+        """
+        transforms = self.transforms.copy() if self.transforms is not None else []
+        
+        if oversampling is not None:
+            transforms.append(Resample(source_sampling_rate=self.sampling_rate, target_sampling_rate=self.sampling_rate * oversampling))
+        transforms.append(Saturation(hard, gain_db, normalize))
+        if oversampling is not None:
+            transforms.append(Resample(source_sampling_rate=self.sampling_rate * oversampling, target_sampling_rate=self.sampling_rate))
+        
+        return fastcopy(
+            self,
+            id=f"{self.id}_sat{gain_db:.1f}" if affix_id else self.id,
+            transforms=transforms,
+        )
 
     @staticmethod
     def from_dict(data: dict) -> "Recording":
